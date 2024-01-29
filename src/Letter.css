@@ -1,0 +1,80 @@
+body {
+  margin: 0;
+  height: 100vh;
+  width: 100vw;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center center;
+}
+
+.letter-container {
+
+  background-image: url('../public/images/letter.jpg');
+  width: 100vw; /* ビューポートの幅に合わせる */
+  height: 100vh; /* ビューポートの高さに合わせる */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background-repeat: no-repeat;
+  background-size: 100vw 100vh; /* 画像をビューポートのサイズに強制的に合わせる */
+}
+
+.letter {
+  background-image: url('../public/images/open.jpg'); /* 手紙の表面の背景画像 */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 100%; /* 必要に応じて調整 */
+  height: 100vh; /* 必要に応じて調整 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  perspective: 1000px;
+  transition: transform 0.5s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-style: preserve-3d; /* 3D変換で表と裏の面を維持 */
+}
+
+.letter-textarea {
+  width: 100%; /* `.letter-inside`と同じ幅にする */
+  height: 80%; /* `.letter-inside`と同じ高さにする */
+  border: none;
+  background: transparent;
+  resize: none;
+  font-size: 16px;
+  line-height: 1.5;
+  outline: none; /* フォーカス時のアウトラインを除去 */
+  margin-top: 14%;
+  margin-left: 7.5%;
+}
+
+
+
+.save-draft-button-container {
+  position: absolute; /* 要素を親要素に対して絶対位置に配置 */
+  left: 50%; /* 要素の左端を親要素の50%の位置に配置 */
+  transform: translateX(-50%); /* 要素を水平方向に-50%移動して中央に配置 */
+  width: fit-content; /* ボタンの幅に合わせてコンテナの幅を設定 */
+  padding: 50px;
+}
+
+.vertical-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+#fontsize-selector{
+  width: 150px;
+}
+
+.font-size-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 垂直方向の中央揃え */
+  align-items: center; /* 水平方向の中央揃え */
+
+}

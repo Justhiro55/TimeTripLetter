@@ -1,0 +1,40 @@
+/* App.css */
+
+.form-container {
+  margin: 2rem auto; /* 左右のマージンをautoにして中央揃えに */
+  padding: 1rem; /* コンテナ内のパディング */
+  max-width: 80%; /* フォームの最大幅を親コンテナの80%に設定 */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+input, select {
+  width: 100%; /* 入力フィールドの幅をコンテナに合わせて調整 */
+  padding: 10px;
+  margin-bottom: 0.5rem;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+legend {
+  padding: 10px;
+  width: auto;
+}
+
+/* フォームグループのスタイル */
+.form-group {
+  margin: 0.2rem;
+}
+
