@@ -2,34 +2,133 @@ package handlers
 
 import (
     "encoding/json"
+    "log"
     "net/http"
+    "strconv"
     "time"
+
+    "github.com/dgrijalva/jwt-go"
+    "myapp/db"
 )
 
-// Activity はユーザーのアクティビティを表す構造体です。
-type Activity struct {
-    ID        int       `json:"id"`
-    Action    string    `json:"action"`
-    Timestamp time.Time `json:"timestamp"`
+// LetterRecipientInfo はレターとその受取人の情報を表す構造体です。
+type LetterRecipientInfo struct {
+    LetterID  int    `json:"letter_id"`
+    RecipientName string `json:"recipient_name"`
+    SendDate   string `json:"send_date"`
 }
 
-// MyPageHandler は /mypageapi エンドポイントのリクエストを処理します。
+// UserInfo はユーザー情報を表す構造体です。
+type UserInfo struct {
+    Username string `json:"username"`
+    Email    string `json:"email"`
+}
+
 func MyPageHandler(w http.ResponseWriter, r *http.Request) {
-    // データベースからアクティビティデータを取得するための仮のコード
-    // 実際の実装では、ここでデータベースクエリを行います。
-    activities := []Activity{
-        {ID: 1, Action: "ログインしました", Timestamp: time.Now()},
-        {ID: 2, Action: "記事を読みました", Timestamp: time.Now()},
-        // 他のアクティビティデータを追加
+    // JWTトークンからユーザーIDを取得
+    var userID int64
+    accessTokenCookie, err := r.Cookie("accessToken")
+    if err != nil || accessTokenCookie.Value == "" {
+        log.Println("No access token found, looking for refresh token")
+        refreshTokenCookie, err := r.Cookie("refreshToken")
+        if err != nil || refreshTokenCookie.Value == "" {
+            http.Error(w, "Unauthorized", http.StatusUnauthorized)
+            return
+        }
+
+        refreshTokenString := refreshTokenCookie.Value
+        refreshTokenClaims := &jwt.StandardClaims{}
+        _, err = jwt.ParseWithClaims(refreshTokenString, refreshTokenClaims, func(token *jwt.Token) (interface{}, error) {
+            return []byte("your_secret_key"), nil
+        })
+
+        if err != nil {
+            http.Error(w, "Unauthorized", http.StatusUnauthorized)
+            return
+        }
+
+        userID, _ = strconv.ParseInt(refreshTokenClaims.Subject, 10, 64)
+        newAccessToken, _ := generateToken(userID)
+        
+        http.SetCookie(w, &http.Cookie{
+            Name:     "accessToken",
+            Value:    newAccessToken,
+            Expires:  time.Now().Add(1 * time.Minute),
+            HttpOnly: true,
+            Path:     "/",
+            Secure:   false, // HTTPSを使用する場合はtrueに変更
+            SameSite: http.SameSiteStrictMode,
+        })
+    } else {
+        accessTokenString := accessTokenCookie.Value
+        accessTokenClaims := &jwt.StandardClaims{}
+        _, err := jwt.ParseWithClaims(accessTokenString, accessTokenClaims, func(token *jwt.Token) (interface{}, error) {
+            return []byte("your_secret_key"), nil
+        })
+
+        if err != nil {
+            http.Error(w, "Unauthorized", http.StatusUnauthorized)
+            return
+        }
+
+        userID, _ = strconv.ParseInt(accessTokenClaims.Subject, 10, 64)
+        
+        if err != nil {
+            http.Error(w, "Invalid token", http.StatusUnauthorized)
+            return
+        }
     }
 
-    // レスポンスヘッダーにContent-Typeを設定
-    w.Header().Set("Content-Type", "application/json")
-    // アクティビティデータをJSONとしてエンコードしてレスポンスに書き込み
-    err := json.NewEncoder(w).Encode(activities)
+    log.Printf("UserID extracted from token: %d", userID)
+
+    // ユーザー情報を取得
+    var userInfo UserInfo
+    userQuery := `SELECT username, email FROM users WHERE id = $1`
+    log.Printf("Executing user query: %s with userID: %d", userQuery, userID)
+
+    err = db.DB.QueryRow(userQuery, userID).Scan(&userInfo.Username, &userInfo.Email)
     if err != nil {
-        // JSONエンコーディングに失敗した場合のエラーハンドリング
-        http.Error(w, err.Error(), http.StatusInternalServerError)
+        log.Printf("Error querying database for user info: %s", err)
+        http.Error(w, "Server error", http.StatusInternalServerError)
         return
+    }
+
+    log.Printf("Found user info: Username: %s, Email: %s", userInfo.Username, userInfo.Email)
+
+    // 送信したレターと受取人情報を取得
+    var letterRecipients []LetterRecipientInfo
+    query := `SELECT l.id, r.name, r.send_date
+              FROM letter l
+              JOIN recipient r ON l.id = r.letter_id
+              WHERE l.user_id = $1`
+    log.Printf("Executing query: %s with userID: %d", query, userID)
+
+    rows, err := db.DB.Query(query, userID)
+    if err != nil {
+        log.Printf("Error querying database for letters and recipients: %s", err)
+        http.Error(w, "Server error", http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
+
+    for rows.Next() {
+        var info LetterRecipientInfo
+        if err := rows.Scan(&info.LetterID, &info.RecipientName, &info.SendDate); err != nil {
+            log.Printf("Error scanning letter recipient info: %s", err)
+            continue
+        }
+        letterRecipients = append(letterRecipients, info)
+    }
+
+    log.Printf("Found %d letter recipient(s)", len(letterRecipients))
+
+    // レスポンスを返す
+    w.Header().Set("Content-Type", "application/json")
+    response := map[string]interface{}{
+        "letterRecipients": letterRecipients,
+        "userInfo":         userInfo,
+    }
+    if err := json.NewEncoder(w).Encode(response); err != nil {
+        log.Printf("Error encoding response: %s", err)
     }
 }

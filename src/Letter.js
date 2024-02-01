@@ -27,7 +27,6 @@ const Letter = () => {
         });
 
         if (response.status === 401) {
-          // トークンが無効の場合はログインページへリダイレクト
           alert('Session expired. Redirecting to login.');
           navigate('/login');
         }
