@@ -24,6 +24,7 @@ type PersonalInfoRequest struct {
     CVC              string `json:"cvc"`
     PhoneNumber      string `json:"phoneNumber"`
     SendDate         string `json:"sendDate"`
+    LetterID        int64 `json:"letterID"`
 }
 
 type Letter struct {

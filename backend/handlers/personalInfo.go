@@ -80,14 +80,14 @@ func PersonalInfoHandler(w http.ResponseWriter, r *http.Request) {
         sendDate = time.Now().Format("2006-01-02 15:04:05")
     }
 
-    // recipient テーブルにデータを挿入
-    _, err = db.DB.Exec("INSERT INTO recipient (user_id, name, address, postal_code, email, phone_number, send_date) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-        userID, req.RecipientName, req.RecipientAddress, req.RecipientZip, req.RecipientEmail, req.PhoneNumber, sendDate)
-    if err != nil {
-        log.Printf("Error inserting into recipient table: %s", err)
-        http.Error(w, "Server error", http.StatusInternalServerError)
-        return
-    }
+    // recipient テーブルにデータを挿入するSQL文を更新して、letter_id カラムに値を設定
+    _, err = db.DB.Exec("INSERT INTO recipient (user_id, name, address, postal_code, email, phone_number, send_date, letter_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+    userID, req.RecipientName, req.RecipientAddress, req.RecipientZip, req.RecipientEmail, req.PhoneNumber, sendDate, req.LetterID)
+if err != nil {
+    log.Printf("Error inserting into recipient table: %s", err)
+    http.Error(w, "Server error", http.StatusInternalServerError)
+    return
+}
 
     // paymentinfo テーブルにデータを挿入
     expiryDate := "2028-06-30" // テスト用の固定された日付

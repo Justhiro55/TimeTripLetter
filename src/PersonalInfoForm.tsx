@@ -21,15 +21,20 @@ export default function PersonalInfoForm() {
 
   const onSubmit = (data: FormData) => {
     const sendDate = localStorage.getItem("sendDate");
-    const completeData = { ...data, sendDate };
-
+    const letterID = localStorage.getItem("letterID"); // letterID をローカルストレージから取得
+    const completeData = { 
+      ...data, 
+      sendDate, 
+      letterID: letterID ? parseInt(letterID, 10) : null // letterID を整数に変換して追加
+    };
+  
     const requestOptions: RequestInit = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(completeData),
       credentials: 'include'
     };
-
+  
     fetch('http://localhost:8080/api/personal-info', requestOptions)
       .then(response => {
         if (response.status === 401) {

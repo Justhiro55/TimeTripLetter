@@ -57,34 +57,31 @@ const Letter = () => {
     formData.append('content', text);
     const fontSizeValue = parseInt(fontSize.replace('px', ''), 10);
     formData.append('fontSize', fontSizeValue);
-
+  
     const requestOptions = {
       method: 'POST',
       body: formData,
       credentials: 'include',
     };
-
+  
     fetch('http://localhost:8080/api/letter', requestOptions)
       .then(response => {
-        if (response.status === 401) {
-          alert('Session expired. Redirecting to login.');
-          navigate('/login');
-          return;
-        }
         if (!response.ok) {
-          throw new Error('File upload failed. Redirecting to login.');
+          throw new Error('Network response was not ok.');
         }
-        setFileUploaded(true);
-        return response.json();
+        return response.json(); // 正常なレスポンスをJSONとして解析
       })
       .then(data => {
-        console.log(data);
-        alert('Draft saved successfully!');
+        if(data.letterID) {
+          localStorage.setItem("letterID", data.letterID.toString()); // 保存された手紙のIDをローカルストレージに保存
+          alert('Draft saved successfully!'); // ここで正常にアラートが表示される
+        } else {
+          throw new Error('Letter ID not found in response.'); // サーバーからのレスポンスにletterIDが含まれていない場合のエラー
+        }
       })
       .catch(error => {
         console.error('Error:', error);
-        // alert('Failed to save. Redirecting to login.');
-        navigate('/login');
+        alert('Failed to save the draft.'); // エラー発生時にユーザーに通知
       });
   };
 

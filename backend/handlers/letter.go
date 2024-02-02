@@ -95,9 +95,10 @@ func LetterHandler(w http.ResponseWriter, r *http.Request) {
         userID, _ = strconv.ParseInt(accessTokenClaims.Subject, 10, 64)
     }
 
-    _, err = db.DB.Exec("INSERT INTO letter (user_id, content, font_size, filename) VALUES ($1, $2, $3, $4)", userID, content, fontSize, filename)
+    var letterID int64
+    err = db.DB.QueryRow("INSERT INTO letter (user_id, content, font_size, filename) VALUES ($1, $2, $3, $4) RETURNING id", userID, content, fontSize, filename).Scan(&letterID)
     if err != nil {
-        log.Printf("Error inserting letter into database: %s", err)
+        log.Printf("Error inserting letter into database and retrieving ID: %s", err)
         http.Error(w, "Server error", http.StatusInternalServerError)
         return
     }
@@ -105,5 +106,9 @@ func LetterHandler(w http.ResponseWriter, r *http.Request) {
     log.Println("Letter saved successfully")
     w.WriteHeader(http.StatusOK)
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(map[string]string{"message": "Letter saved successfully"})
+// letterIDをレスポンスに含める
+json.NewEncoder(w).Encode(map[string]interface{}{
+    "message": "Letter saved successfully",
+    "letterID": letterID,
+})
 }
