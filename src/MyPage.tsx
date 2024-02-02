@@ -1,58 +1,76 @@
 import React, { useState, useEffect } from 'react';
+import './MyPage.module.css'; // CSSモジュールをインポート
 
-type Activity = {
-  id: number;
-  action: string;
-  timestamp: Date;
+type LetterRecipientInfo = {
+  letter_id: number;
+  recipient_name: string;
+  send_date: string;
+};
+
+type UserInfo = {
+  username: string;
+  email: string;
 };
 
 const MyPage = () => {
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [letterRecipients, setLetterRecipients] = useState<LetterRecipientInfo[]>([]);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
-  // データを取得するための仮想関数
-  const fetchActivities = async () => {
-	try {
-	  // APIエンドポイントへのリクエスト
-	  const response = await fetch('http://localhost:8000/mypageapi', {
-		method: 'GET',
-		headers: {
-		  // 必要に応じてヘッダーを設定
-		  'Content-Type': 'application/json',
-		  // 認証トークンが必要な場合は以下のように設定
-		  // 'Authorization': 'Bearer YOUR_TOKEN_HERE',
-		},
-		credentials: 'include', // クッキーを使用する場合は必要
-	  });
-  
-	  if (!response.ok) {
-		throw new Error('Network response was not ok');
-	  }
-  
-	  // レスポンスデータをJSONとして解析
-	  const fetchedActivities = await response.json();
-  
-	  // 状態を更新
-	  setActivities(fetchedActivities);
-	} catch (error) {
-	  console.error('Fetch activities failed:', error);
-	}
+  const fetchLetterRecipients = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/mypage', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log(data);
+      setLetterRecipients(data.letterRecipients || []);
+      setUserInfo(data.userInfo || null);
+    } catch (error) {
+      console.error('Fetch letter recipients failed:', error);
+      setLetterRecipients([]);
+    }
   };
 
   useEffect(() => {
-    fetchActivities();
+    fetchLetterRecipients();
   }, []);
 
   return (
-    <div>
+    <div className="container">
       <h1>マイページ</h1>
-      <h2>アクティビティ履歴</h2>
-      <ul>
-        {activities.map(activity => (
-          <li key={activity.id}>
-            {activity.action} - {activity.timestamp.toLocaleString()}
-          </li>
-        ))}
-      </ul>
+      {userInfo && (
+        <div className="user-info-box">
+          <h2>ユーザー情報</h2>
+          <div className="user-info">
+            <p><strong>ユーザー名:</strong> {userInfo.username}</p>
+            <p><strong>Email:</strong> {userInfo.email}</p>
+          </div>
+        </div>
+      )}
+      <h2>送信したレターと受取人情報</h2>
+      <div className="letter-info-box">
+        <ul className="letter-list">
+          {letterRecipients && letterRecipients.length > 0 ? (
+            letterRecipients.map(({ recipient_name, send_date }) => (
+              <li key={send_date + recipient_name} className="listItem">
+                <div className="listItemHeader">受取人: {recipient_name}</div>
+                <div>送信日: {send_date}</div>
+              </li>
+            ))
+          ) : (
+            <p>送信したレター情報はありません。</p>
+          )}
+        </ul>
+      </div>
     </div>
   );
 };
