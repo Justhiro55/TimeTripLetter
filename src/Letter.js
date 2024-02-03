@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import html2canvas from 'html2canvas';
 import 'react-quill/dist/quill.snow.css'; // スタイルシートをインポート
+import Sent from "./compornents/Sent.js"
 import './Letter.css';
 
 const Letter = () => {
@@ -54,7 +55,7 @@ const Letter = () => {
 
   const takeScreenshot = () => {
     if (captureRef.current) {
-      html2canvas(captureRef.current, {scrollY: -window.scrollY}).then(canvas => {
+      html2canvas(captureRef.current, { scrollY: -window.scrollY }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = imgData;
@@ -72,13 +73,13 @@ const Letter = () => {
     formData.append('content', text);
     const fontSizeValue = parseInt(fontSize.replace('px', ''), 10);
     formData.append('fontSize', fontSizeValue);
-  
+
     const requestOptions = {
       method: 'POST',
       body: formData,
       credentials: 'include',
     };
-  
+
     fetch('http://localhost:8080/api/letter', requestOptions)
       .then(response => {
         if (!response.ok) {
@@ -87,7 +88,7 @@ const Letter = () => {
         return response.json(); // 正常なレスポンスをJSONとして解析
       })
       .then(data => {
-        if(data.letterID) {
+        if (data.letterID) {
           localStorage.setItem("letterID", data.letterID.toString()); // 保存された手紙のIDをローカルストレージに保存
           alert('Draft saved successfully!'); // ここで正常にアラートが表示される
         } else {
@@ -113,7 +114,7 @@ const Letter = () => {
     marginTop: '10px', // 上のマージンを適宜調整
     minHeight: '700px', // コンテナの最小高さを設定
   };
-  
+
   const quillStyle = {
     width: '100%',
     height: '600px',
@@ -130,17 +131,21 @@ const Letter = () => {
         </div>
       )}
       {isOpen && (
-        <div ref={captureRef} style={{ width: '100%', height: '100%' }}> {/* スクリーンショット対象のエリア */}
-          <div style={{...editorContainerStyle}}>
-            {/* <Font fontState={[fontSize, setFontSize]} /> */}
+        <div ref={captureRef} style={{ width: '100%', height: '100%' }}>
+          <div style={{ ...editorContainerStyle }}>
             <ReactQuill theme="snow" value={text} onChange={setText} style={quillStyle} />
             {/* その他の入力フィールド... */}
           </div>
-          <div className="save-draft-button-container">
+          {/* Sent コンポーネントを追加して、sendDate ステートを渡す */}
+          <div className="date-picker-container">
+            <Sent sentState={[sendDate, setSendDate]} />
+            {/* その他のコンテンツ */}
+          </div>
+            <div className="save-draft-button-container">
             <button onClick={handleSaveDraft} className="save-draft-button">
               Complete Draft
             </button>
-            <button onClick={takeScreenshot} className="save-draft-button">Save as Image</button> {/* 画像保存ボタン */}
+            <button onClick={takeScreenshot} className="save-draft-button">Save as Image</button>
           </div>
         </div>
       )}
