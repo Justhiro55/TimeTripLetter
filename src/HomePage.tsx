@@ -7,7 +7,7 @@ export default function HomePage() {
 
   const checkAuthentication = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/verifyToken', {
+      const response = await fetch('http://localhost:8080/api/token/check', {
         method: 'POST',
         credentials: 'include' // クレデンシャルを含む
       });

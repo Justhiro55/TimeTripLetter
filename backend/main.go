@@ -28,7 +28,6 @@ func main() {
     http.Handle("/api/confirmation", corsHandler.Handler(http.HandlerFunc(handlers.ConfirmationHandler)))
     http.Handle("/api/logout", corsHandler.Handler(http.HandlerFunc(handlers.LogoutHandler)))
     http.Handle("/api/token/check", corsHandler.Handler(http.HandlerFunc(handlers.CheckTokenHandler)))
-    http.Handle("/api/verifyToken", corsHandler.Handler(http.HandlerFunc(handlers.VerifyTokenHandler)))
     http.Handle("/api/mypage", corsHandler.Handler(http.HandlerFunc(handlers.MyPageHandler)))
 
 
