@@ -97,7 +97,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     http.SetCookie(w, &http.Cookie{
         Name:     "accessToken",
         Value:    accessToken,
-        Expires:  time.Now().Add(1 * time.Minute),
+        Expires:  time.Now().Add(100 * time.Minute),
         HttpOnly: true,
         Path:     "/",
         Secure:   false,
@@ -107,7 +107,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         Name:     "refreshToken",
         Value:    refreshToken,
         // Expires:  time.Now().Add(7 * 24 * time.Hour),
-        Expires:  time.Now().Add(1 * time.Minute),
+        Expires:  time.Now().Add(100 * time.Minute),
         HttpOnly: true,
         Path:     "/",
         Secure:   false,

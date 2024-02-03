@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactQuill from 'react-quill';
+import html2canvas from 'html2canvas';
+import 'react-quill/dist/quill.snow.css'; // スタイルシートをインポート
 import './Letter.css';
-import Font from "./compornents/Font.js"
-import Sent from "./compornents/Sent.js"
-import Text from "./compornents/Text.js"
 
 const Letter = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +13,7 @@ const Letter = () => {
   const [fileUploaded, setFileUploaded] = useState(false);
   const [sendDate, setSendDate] = useState("");
   const navigate = useNavigate();
+  const captureRef = useRef(null);
 
   const handleClick = () => {
     setIsOpen(true);
@@ -51,6 +52,20 @@ const Letter = () => {
     navigate('/personal-info');
   };
 
+  const takeScreenshot = () => {
+    if (captureRef.current) {
+      html2canvas(captureRef.current, {scrollY: -window.scrollY}).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = 'letter_capture.png'; // ファイル名を設定
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    }
+  };
+
   const saveLetterToServer = () => {
     const formData = new FormData();
     formData.append('file', file);
@@ -85,33 +100,47 @@ const Letter = () => {
       });
   };
 
+  const editorContainerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start', // 上端に寄せる
+    alignItems: 'center',
+    background: 'url(/images/letter.jpg) no-repeat center center',
+    backgroundSize: 'cover',
+    padding: '20px',
+    width: '80%',
+    margin: '0 auto',
+    marginTop: '10px', // 上のマージンを適宜調整
+    minHeight: '700px', // コンテナの最小高さを設定
+  };
+  
+  const quillStyle = {
+    width: '100%',
+    height: '600px',
+    paddingTop: '0px',
+    backgroundColor: 'transparent',
+    border: 'none',
+  };
+
   return (
     <>
       {!isOpen && (
-        <div className="letter" onClick={handleClick}>
-          {/* Letter front content */}
+        <div className="letter" onClick={() => setIsOpen(true)}>
+          Click to Open Letter Editor
         </div>
       )}
       {isOpen && (
-        <div>
-          <Font fontState={[fontSize, setFontSize]} />
-          <Text fontState={[fontSize, setFontSize]} textState={[text, setText]} />
-          <div>
-            <input type="file" onChange={handleFileChange} />
-            {fileUploaded && <div>File uploaded successfully.</div>}
-          </div>
-          <div>
-            <label>Sending Date:</label>
-            <input
-              type="date"
-              value={sendDate}
-              onChange={(e) => setSendDate(e.target.value)}
-            />
+        <div ref={captureRef} style={{ width: '100%', height: '100%' }}> {/* スクリーンショット対象のエリア */}
+          <div style={{...editorContainerStyle}}>
+            {/* <Font fontState={[fontSize, setFontSize]} /> */}
+            <ReactQuill theme="snow" value={text} onChange={setText} style={quillStyle} />
+            {/* その他の入力フィールド... */}
           </div>
           <div className="save-draft-button-container">
             <button onClick={handleSaveDraft} className="save-draft-button">
               Complete Draft
             </button>
+            <button onClick={takeScreenshot} className="save-draft-button">Save as Image</button> {/* 画像保存ボタン */}
           </div>
         </div>
       )}

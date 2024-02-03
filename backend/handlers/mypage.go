@@ -53,7 +53,7 @@ func MyPageHandler(w http.ResponseWriter, r *http.Request) {
         http.SetCookie(w, &http.Cookie{
             Name:     "accessToken",
             Value:    newAccessToken,
-            Expires:  time.Now().Add(1 * time.Minute),
+            Expires:  time.Now().Add(100 * time.Minute),
             HttpOnly: true,
             Path:     "/",
             Secure:   false, // HTTPSを使用する場合はtrueに変更

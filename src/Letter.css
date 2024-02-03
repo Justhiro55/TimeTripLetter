@@ -52,6 +52,14 @@ body {
   margin-left: 7.5%;
 }
 
+.save-draft-button-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+}
 
 
 .save-draft-button-container {
