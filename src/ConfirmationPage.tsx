@@ -61,6 +61,9 @@ export default function ConfirmationPage() {
 
             <h2>手紙の内容</h2>
             {letterInfo && <p>{letterInfo.content}</p>}
+            {/* ここに画像を表示 */}
+            <h2>手紙のスクリーンショット</h2>
+            <img src="/images/letter_capture.png" alt="Letter Screenshot" width="300"/>
 
             <h2>送り先の情報</h2>
             {recipientInfo && (
