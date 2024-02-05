@@ -93,6 +93,17 @@ func ConfirmationHandler(w http.ResponseWriter, r *http.Request) {
     var userInfo models.UserInfo
 
 
+    // ユーザー情報の取得
+    err = db.DB.QueryRow("SELECT username, email FROM users WHERE id = $1", userID).Scan(
+        &userInfo.Username,
+        &userInfo.Email,
+    )
+    if err != nil {
+        log.Printf("Error retrieving user info: %s", err)
+        http.Error(w, "Server error", http.StatusInternalServerError)
+        return
+    }
+
     // レスポンスの作成
     response := models.ConfirmationResponse{
         UserInfo:      userInfo,

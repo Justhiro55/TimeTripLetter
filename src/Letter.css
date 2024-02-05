@@ -9,6 +9,8 @@ body {
 }
 
 .letter-container {
+  display: flex;
+  flex-direction: column; /* 子要素を垂直方向に並べる */
 
   background-image: url('../public/images/letter.jpg');
   width: 100vw; /* ビューポートの幅に合わせる */
@@ -53,21 +55,9 @@ body {
 }
 
 .save-draft-button-container {
-  width: 100%;
   display: flex;
-  justify-content: center;
-  position: fixed;
-  bottom: 20px;
-  left: 0;
-}
-
-
-.save-draft-button-container {
-  position: absolute; /* 要素を親要素に対して絶対位置に配置 */
-  left: 50%; /* 要素の左端を親要素の50%の位置に配置 */
-  transform: translateX(-50%); /* 要素を水平方向に-50%移動して中央に配置 */
-  width: fit-content; /* ボタンの幅に合わせてコンテナの幅を設定 */
-  padding: 50px;
+  justify-content: center; /* 中央揃え */
+  /* margin: 10px; 送信日選択との間隔を確保 */
 }
 
 .vertical-layout {
@@ -79,10 +69,15 @@ body {
   width: 150px;
 }
 
-.font-size-container {
+/* 日付選択項目を中央配置するためのコンテナスタイル */
+.date-picker-container {
   display: flex;
-  flex-direction: column;
-  justify-content: center; /* 垂直方向の中央揃え */
-  align-items: center; /* 水平方向の中央揃え */
+  justify-content: center; /* 水平方向の中央揃え */
+  align-items: center; /* 垂直方向の中央揃え */
+  height: 8vh; /* コンテナの高さをビューポートの高さに合わせる */
+  flex-direction: column; /* 子要素を垂直方向に配置 */
+}
 
+.font-size-container {
+  margin-bottom: 0px; /* ボタンとの間にスペースを追加 */
 }

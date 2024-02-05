@@ -7,30 +7,6 @@ import (
     "time"
 )
 
-func VerifyTokenHandler(w http.ResponseWriter, r *http.Request) {
-    // リクエストからクッキーを取得
-    cookie, err := r.Cookie("accessToken")
-    if err != nil {
-        http.Error(w, "Cookie not found", http.StatusUnauthorized)
-        return
-    }
-
-    // トークンの検証
-    token, err := jwt.Parse(cookie.Value, func(token *jwt.Token) (interface{}, error) {
-        // トークンの署名を検証するためのキーを返す
-        return []byte("your_secret_key"), nil
-    })
-
-    if err != nil || !token.Valid {
-        http.Error(w, "Invalid token", http.StatusUnauthorized)
-        return
-    }
-
-    // トークンが有効な場合
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte("Token is valid"))
-}
-
 func CheckTokenHandler(w http.ResponseWriter, r *http.Request) {
     accessTokenCookie, _ := r.Cookie("accessToken")
     refreshTokenCookie, _ := r.Cookie("refreshToken")

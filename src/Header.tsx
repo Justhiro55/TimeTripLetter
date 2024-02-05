@@ -9,7 +9,7 @@ export default function Header() {
 
   useEffect(() => {
     // トークン検証
-    fetch('http://localhost:8080/api/verifyToken', {
+    fetch('http://localhost:8080/api/token/check', {
       method: 'GET',
       credentials: 'include',
     })
