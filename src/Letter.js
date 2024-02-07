@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import html2canvas from 'html2canvas';
@@ -15,6 +16,8 @@ const Letter = () => {
   const [sendDate, setSendDate] = useState("");
   const navigate = useNavigate();
   const captureRef = useRef(null);
+  const location = useLocation();
+  const { imageUrl } = location.state || {};
 
   const handleClick = () => {
     setIsOpen(true);
@@ -52,19 +55,32 @@ const Letter = () => {
     localStorage.setItem("sendDate", sendDate);
     navigate('/personal-info');
   };
-
   const takeScreenshot = () => {
     if (captureRef.current) {
       html2canvas(captureRef.current, { scrollY: -window.scrollY }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = imgData;
-        link.download = 'letter_capture.png'; // ファイル名を設定
+        link.download = 'letter_capture.png';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       });
     }
+  };
+
+  const editorContainerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundImage: `url(${imageUrl})`,
+    backgroundSize: 'cover',
+    padding: '20px',
+    width: '80%',
+    margin: '0 auto',
+    marginTop: '10px',
+    minHeight: '700px',
   };
 
   const saveLetterToServer = () => {
@@ -101,19 +117,7 @@ const Letter = () => {
       });
   };
 
-  const editorContainerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start', // 上端に寄せる
-    alignItems: 'center',
-    background: 'url(/images/letter.jpg) no-repeat center center',
-    backgroundSize: 'cover',
-    padding: '20px',
-    width: '80%',
-    margin: '0 auto',
-    marginTop: '10px', // 上のマージンを適宜調整
-    minHeight: '700px', // コンテナの最小高さを設定
-  };
+
 
   const quillStyle = {
     width: '100%',
@@ -154,3 +158,74 @@ const Letter = () => {
 };
 
 export default Letter;
+
+
+
+
+
+
+// import React, { useState, useRef } from 'react';
+// import { useLocation } from 'react-router-dom';
+// import ReactQuill from 'react-quill';
+// import html2canvas from 'html2canvas';
+// import 'react-quill/dist/quill.snow.css';
+// import './Letter.css';
+
+// const Letter = () => {
+//   const [text, setText] = useState("");
+//   const captureRef = useRef(null);
+//   const location = useLocation();
+//   const { imageUrl } = location.state || {};
+
+//   const takeScreenshot = () => {
+//     if (captureRef.current) {
+//       html2canvas(captureRef.current, { scrollY: -window.scrollY }).then(canvas => {
+//         const imgData = canvas.toDataURL('image/png');
+//         const link = document.createElement('a');
+//         link.href = imgData;
+//         link.download = 'letter_capture.png';
+//         document.body.appendChild(link);
+//         link.click();
+//         document.body.removeChild(link);
+//       });
+//     }
+//   };
+
+//   const editorContainerStyle = {
+//     display: 'flex',
+//     flexDirection: 'column',
+//     justifyContent: 'flex-start',
+//     alignItems: 'center',
+//     backgroundImage: `url(${imageUrl})`,
+//     backgroundSize: 'cover',
+//     padding: '20px',
+//     width: '80%',
+//     margin: '0 auto',
+//     marginTop: '10px',
+//     minHeight: '700px',
+//   };
+
+//   const quillStyle = {
+//     width: '100%',
+//     height: '600px',
+//     paddingTop: '0px',
+//     backgroundColor: 'transparent',
+//     border: 'none',
+//   };
+
+//   return (
+//     <div ref={captureRef} style={{ width: '100%', height: '100%' }}>
+//       <div style={{ ...editorContainerStyle }}>
+//         <ReactQuill theme="snow" value={text} onChange={setText} style={quillStyle} />
+//       </div>
+//       <div className="date-picker-container">
+//         {/* Sent コンポーネントの追加 */}
+//       </div>
+//       <div className="save-draft-button-container">
+//         <button onClick={takeScreenshot} className="save-draft-button">Save as Image</button>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Letter;
