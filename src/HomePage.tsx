@@ -30,10 +30,12 @@ export default function HomePage() {
   return (
     <div className="page-container">
       <h1>ホームページ</h1>
-      <button onClick={() => navigate('/signup')}>アカウント作成</button>
-      <button onClick={handleLogin}>
-        {authenticated ? 'ログイン' : 'ログイン'}
-      </button>
+      {/* <button onClick={() => navigate('/signup')}>アカウント作成</button> */}
+      {/* <button onClick={handleLogin}>
+        {authenticated ? 'ログイン' : 'ログイン'} */}
+      <button onClick={() => navigate('/analog')}>アナログ</button> {/* アナログページへのボタン */}
+      <button onClick={() => navigate('/letter')}>デジタル</button>
+      {/* </button> */}
     </div>
   );
 }

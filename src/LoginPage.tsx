@@ -15,7 +15,7 @@ const LoginPage = () => {
     console.log('Login successful'); // ログイン成功時にコンソールに表示
 
     // ログイン成功時にタイトルページに移動
-    navigate('/title'); // '/title' ページに移動
+    navigate('/personal-info'); // '/title' ページに移動
   };
 
   const handleLogin = async (e: FormEvent) => {
