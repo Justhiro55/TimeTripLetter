@@ -23,27 +23,27 @@ const Letter = () => {
     setIsOpen(true);
   };
 
-  // ページにアクセスした際にトークンを確認する
-  // useEffect(() => {
-  //   const checkToken = async () => {
-  //     try {
-  //       const response = await fetch('http://localhost:8080/api/token/check', {
-  //         credentials: 'include'
-  //       });
+  ページにアクセスした際にトークンを確認する
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/token/check', {
+          credentials: 'include'
+        });
 
-  //       if (response.status === 401) {
-  //         alert('Session expired. Redirecting to login.');
-  //         navigate('/login');
-  //       }
-  //     } catch (error) {
-  //       alert('Session expired. Redirecting to login.');
-  //       console.error('Error:', error);
-  //       navigate('/login');
-  //     }
-  //   };
+        if (response.status === 401) {
+          alert('Session expired. Redirecting to login.');
+          navigate('/login');
+        }
+      } catch (error) {
+        alert('Session expired. Redirecting to login.');
+        console.error('Error:', error);
+        navigate('/login');
+      }
+    };
 
-  //   checkToken();
-  // }, [navigate]);
+    checkToken();
+  }, [navigate]);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -148,7 +148,7 @@ const Letter = () => {
   return (
     <>
       {!isOpen && (
-        <div onClick={() => setIsOpen(true)} style={closedLetterStyle}>
+        <div className="letter" onClick={() => setIsOpen(true)} style={closedLetterStyle}>
           Click to Open Letter Editor
         </div>
       )}
@@ -176,3 +176,4 @@ const Letter = () => {
 };
 
 export default Letter;
+
