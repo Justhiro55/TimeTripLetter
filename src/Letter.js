@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import html2canvas from 'html2canvas';
@@ -15,32 +16,34 @@ const Letter = () => {
   const [sendDate, setSendDate] = useState("");
   const navigate = useNavigate();
   const captureRef = useRef(null);
+  const location = useLocation();
+  const { imageUrl1, imageUrl2 } = location.state || { imageUrl1: '', imageUrl2: '' };
 
   const handleClick = () => {
     setIsOpen(true);
   };
 
   // ページにアクセスした際にトークンを確認する
-  useEffect(() => {
-    const checkToken = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/api/token/check', {
-          credentials: 'include'
-        });
+  // useEffect(() => {
+  //   const checkToken = async () => {
+  //     try {
+  //       const response = await fetch('http://localhost:8080/api/token/check', {
+  //         credentials: 'include'
+  //       });
 
-        if (response.status === 401) {
-          alert('Session expired. Redirecting to login.');
-          navigate('/login');
-        }
-      } catch (error) {
-        alert('Session expired. Redirecting to login.');
-        console.error('Error:', error);
-        navigate('/login');
-      }
-    };
+  //       if (response.status === 401) {
+  //         alert('Session expired. Redirecting to login.');
+  //         navigate('/login');
+  //       }
+  //     } catch (error) {
+  //       alert('Session expired. Redirecting to login.');
+  //       console.error('Error:', error);
+  //       navigate('/login');
+  //     }
+  //   };
 
-    checkToken();
-  }, [navigate]);
+  //   checkToken();
+  // }, [navigate]);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -52,19 +55,32 @@ const Letter = () => {
     localStorage.setItem("sendDate", sendDate);
     navigate('/personal-info');
   };
-
   const takeScreenshot = () => {
     if (captureRef.current) {
       html2canvas(captureRef.current, { scrollY: -window.scrollY }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = imgData;
-        link.download = 'letter_capture.png'; // ファイル名を設定
+        link.download = 'letter_capture.png';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       });
     }
+  };
+
+  const editorContainerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundImage: `url(${imageUrl2})`,
+    backgroundSize: 'cover',
+    padding: '20px',
+    width: '80%',
+    margin: '0 auto',
+    marginTop: '10px',
+    minHeight: '700px',
   };
 
   const saveLetterToServer = () => {
@@ -101,19 +117,25 @@ const Letter = () => {
       });
   };
 
-  const editorContainerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start', // 上端に寄せる
-    alignItems: 'center',
-    background: 'url(/images/letter.jpg) no-repeat center center',
+  const closedLetterStyle = {
+    backgroundImage: `url(${imageUrl1})`,
     backgroundSize: 'cover',
-    padding: '20px',
-    width: '80%',
-    margin: '0 auto',
-    marginTop: '10px', // 上のマージンを適宜調整
-    minHeight: '700px', // コンテナの最小高さを設定
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center center',
+    width: '100%',
+    height: '100vh',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    perspective: '1000px',
+    transition: 'transform 0.5s ease',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    transformStyle: 'preserve-3d',
   };
+
+
 
   const quillStyle = {
     width: '100%',
@@ -126,7 +148,7 @@ const Letter = () => {
   return (
     <>
       {!isOpen && (
-        <div className="letter" onClick={() => setIsOpen(true)}>
+        <div onClick={() => setIsOpen(true)} style={closedLetterStyle}>
           Click to Open Letter Editor
         </div>
       )}
