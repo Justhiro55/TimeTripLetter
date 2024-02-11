@@ -106,8 +106,8 @@ func LetterHandler(w http.ResponseWriter, r *http.Request) {
     log.Println("Letter saved successfully")
     w.WriteHeader(http.StatusOK)
     w.Header().Set("Content-Type", "application/json")
-// letterIDをレスポンスに含める
-json.NewEncoder(w).Encode(map[string]interface{}{
+    // letterIDをレスポンスに含める
+    json.NewEncoder(w).Encode(map[string]interface{}{
     "message": "Letter saved successfully",
     "letterID": letterID,
 })

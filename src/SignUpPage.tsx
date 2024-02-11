@@ -51,7 +51,7 @@ export default function SignUpPage() {
         throw new Error('サインアップに失敗しました');
       }
 
-      navigate('/'); // サインアップ成功後のページへ移動
+      navigate('/login'); // サインアップ成功後のページへ移動
     } catch (error) {
       console.error('サインアップエラー:', error);
       setError(error instanceof Error ? error.message : 'エラーが発生しました'); // エラーメッセージをセット

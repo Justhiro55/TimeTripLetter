@@ -29,7 +29,7 @@ func main() {
     http.Handle("/api/logout", corsHandler.Handler(http.HandlerFunc(handlers.LogoutHandler)))
     http.Handle("/api/token/check", corsHandler.Handler(http.HandlerFunc(handlers.CheckTokenHandler)))
     http.Handle("/api/mypage", corsHandler.Handler(http.HandlerFunc(handlers.MyPageHandler)))
-
+    http.Handle("/api/temp-letters", corsHandler.Handler(http.HandlerFunc(handlers.SaveTempLetterHandler)))
 
     log.Println("Server starting on http://localhost:8080")
     if err := http.ListenAndServe(":8080", nil); err != nil {

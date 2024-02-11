@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Letter.css';
-import Font from "./compornents/Font.js"
+import ReactQuill from 'react-quill';
+import html2canvas from 'html2canvas';
+import 'react-quill/dist/quill.snow.css';
 import Sent from "./compornents/Sent.js"
-import Text from "./compornents/Text.js"
+import './Letter.css';
 
 const Letter = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,109 +14,111 @@ const Letter = () => {
   const [fileUploaded, setFileUploaded] = useState(false);
   const [sendDate, setSendDate] = useState("");
   const navigate = useNavigate();
+  const captureRef = useRef(null);
 
-  const handleClick = () => {
-    setIsOpen(true);
-  };
-
-  // ページにアクセスした際にトークンを確認する
   useEffect(() => {
-    const checkToken = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/api/token/check', {
-          credentials: 'include'
-        });
+    console.log("Text:", text);
+    console.log("FontSize:", fontSize);
+  }, [text, fontSize]);
 
-        if (response.status === 401) {
-          alert('Session expired. Redirecting to login.');
-          navigate('/login');
-        }
-      } catch (error) {
-        alert('Session expired. Redirecting to login.');
-        console.error('Error:', error);
-        navigate('/login');
-      }
-    };
-
-    checkToken();
-  }, [navigate]);
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-  };
-
-  const handleSaveDraft = () => {
-    saveLetterToServer();
-    localStorage.setItem("sendDate", sendDate);
-    navigate('/personal-info');
-  };
-
-  const saveLetterToServer = () => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('content', text);
-    const fontSizeValue = parseInt(fontSize.replace('px', ''), 10);
-    formData.append('fontSize', fontSizeValue);
-
-    const requestOptions = {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    };
-
-    fetch('http://localhost:8080/api/letter', requestOptions)
-      .then(response => {
-        if (response.status === 401) {
-          alert('Session expired. Redirecting to login.');
-          navigate('/login');
-          return;
-        }
-        if (!response.ok) {
-          throw new Error('File upload failed. Redirecting to login.');
-        }
-        setFileUploaded(true);
-        return response.json();
-      })
-      .then(data => {
-        console.log(data);
-        alert('Draft saved successfully!');
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        // alert('Failed to save. Redirecting to login.');
-        navigate('/login');
+  const takeScreenshot = () => {
+    if (captureRef.current) {
+      html2canvas(captureRef.current, { scrollY: -window.scrollY }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = 'letter_capture.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       });
+    }
+  };
+
+  const saveLetterTemporarily = async () => {
+    // 送信するデータの内容をログに出力
+    const requestData = { content: text, fontSize: parseInt(fontSize, 10), filename: file ? file.name : '' };
+    console.log('Sending request data:', requestData);
+
+    try {
+      const response = await fetch('http://localhost:8080/api/temp-letters', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save the letter temporarily.');
+      }
+
+      const responseData = await response.json();
+      console.log('Temporary letter ID:', responseData.tempLetterId);
+    } catch (error) {
+      console.error('Error saving letter temporarily:', error);
+    }
+};
+
+  const handleNavigateToLogin = () => {
+    setFontSize("16px"); // フォントサイズを設定
+    saveLetterTemporarily().then(() => navigate('/login'));
+  };
+  
+
+  const handleNavigateToSignup = () => {
+    setFontSize("16px"); // フォントサイズを設定
+    saveLetterTemporarily().then(() => navigate('/signup'));
+  };
+
+
+  const editorContainerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    background: 'url(/images/letter.jpg) no-repeat center center',
+    backgroundSize: 'cover',
+    padding: '20px',
+    width: '80%',
+    margin: '0 auto',
+    marginTop: '10px',
+    minHeight: '700px',
+  };
+
+  const quillStyle = {
+    width: '100%',
+    height: '600px',
+    paddingTop: '0px',
+    backgroundColor: 'transparent',
+    border: 'none',
+    fontSize: fontSize, // フォントサイズの値をここで設定
   };
 
   return (
     <>
       {!isOpen && (
-        <div className="letter" onClick={handleClick}>
-          {/* Letter front content */}
+        <div className="letter" onClick={() => setIsOpen(true)}>
+          Click to Open Letter Editor
         </div>
       )}
       {isOpen && (
-        <div>
-          <Font fontState={[fontSize, setFontSize]} />
-          <Text fontState={[fontSize, setFontSize]} textState={[text, setText]} />
-          <div>
-            <input type="file" onChange={handleFileChange} />
-            {fileUploaded && <div>File uploaded successfully.</div>}
+        <div ref={captureRef} style={{ width: '100%', height: '100%' }}>
+          <div style={{ ...editorContainerStyle }}>
+            <ReactQuill theme="snow" value={text} onChange={setText} style={quillStyle} />
           </div>
-          <div>
-            <label>Sending Date:</label>
-            <input
-              type="date"
-              value={sendDate}
-              onChange={(e) => setSendDate(e.target.value)}
-            />
+          <Sent sentState={[sendDate, setSendDate]} />
+          <div className="button-container">
+          <div className="login-signup-guide">
+            <p>アカウントをお持ちの方はこちら</p>
+            <button onClick={handleNavigateToLogin} className="login-button">ログイン</button>
           </div>
-          <div className="save-draft-button-container">
-            <button onClick={handleSaveDraft} className="save-draft-button">
-              Complete Draft
-            </button>
+          <div className="login-signup-guide">
+            <p>アカウントをお持ちでない方はこちら</p>
+            <button onClick={handleNavigateToSignup} className="signup-button">サインアップ</button>
           </div>
+          <button onClick={takeScreenshot} className="save-draft-button">Save as Image</button>
+        </div>
         </div>
       )}
     </>
