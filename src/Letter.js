@@ -36,10 +36,8 @@ const Letter = () => {
   };
 
   const saveLetterTemporarily = async () => {
-    // 送信するデータの内容をログに出力
     const requestData = { content: text, fontSize: parseInt(fontSize, 10), filename: file ? file.name : '' };
-    console.log('Sending request data:', requestData);
-
+  
     try {
       const response = await fetch('http://localhost:8080/api/temp-letters', {
         method: 'POST',
@@ -48,27 +46,38 @@ const Letter = () => {
         },
         body: JSON.stringify(requestData),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to save the letter temporarily.');
       }
-
+  
       const responseData = await response.json();
       console.log('Temporary letter ID:', responseData.tempLetterId);
+      return responseData.tempLetterId; // tempLetterId を返す
     } catch (error) {
       console.error('Error saving letter temporarily:', error);
+      throw error;
     }
-};
-
-  const handleNavigateToLogin = () => {
-    setFontSize("16px"); // フォントサイズを設定
-    saveLetterTemporarily().then(() => navigate('/login'));
   };
   
-
-  const handleNavigateToSignup = () => {
+  const handleNavigateToLogin = async () => {
     setFontSize("16px"); // フォントサイズを設定
-    saveLetterTemporarily().then(() => navigate('/signup'));
+    try {
+      const tempLetterId = await saveLetterTemporarily(); // tempLetterId を取得
+      navigate('/login', { state: { tempLetterId } }); // 手紙の ID を渡してログインページに遷移
+    } catch (error) {
+      // エラー処理
+    }
+  };
+
+  const handleNavigateToSignup = async () => {
+    setFontSize("16px"); // フォントサイズを設定
+    try {
+      const tempLetterId = await saveLetterTemporarily(); // tempLetterId を取得
+      navigate('/signup', { state: { tempLetterId } }); // 手紙の ID を渡してサインアップページに遷移
+    } catch (error) {
+      // エラー処理
+    }
   };
 
 

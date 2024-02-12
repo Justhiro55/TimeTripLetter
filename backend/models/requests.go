@@ -8,8 +8,9 @@ type SignUpRequest struct {
 }
 
 type LoginRequest struct {
-    Email    string `json:"email"`
-    Password string `json:"password"`
+    Email        string `json:"email"`
+    Password     string `json:"password"`
+    TempLetterID string `json:"tempLetterId"` // Add TempLetterID field
 }
 
 type PersonalInfoRequest struct {
