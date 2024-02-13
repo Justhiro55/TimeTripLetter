@@ -40,7 +40,7 @@ export default function TitlePage() {
   return (
     <div className="page-container">
       <h1>Welcome, {userName}!</h1>
-      <button onClick={() => navigate('/Letter')}>Write a Letter</button>
+      <button onClick={() => navigate('/template')}>Write a Letter</button>
     </div>
   );
 }

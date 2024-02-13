@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import html2canvas from 'html2canvas';
 import 'react-quill/dist/quill.snow.css';
-import Sent from "./compornents/Sent.js"
+import Sent from "./compornents/Sent.js";
 import './Letter.css';
 
 const Letter = () => {
@@ -15,6 +15,8 @@ const Letter = () => {
   const [sendDate, setSendDate] = useState("");
   const navigate = useNavigate();
   const captureRef = useRef(null);
+  const location = useLocation();
+  const { imageUrl1, imageUrl2 } = location.state || { imageUrl1: '', imageUrl2: '' };
 
   useEffect(() => {
     console.log("Text:", text);
@@ -33,6 +35,40 @@ const Letter = () => {
         document.body.removeChild(link);
       });
     }
+  };
+
+  const saveLetterToServer = () => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('content', text);
+    const fontSizeValue = parseInt(fontSize.replace('px', ''), 10);
+    formData.append('fontSize', fontSizeValue);
+
+    const requestOptions = {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    };
+
+    fetch('http://localhost:8080/api/letter', requestOptions)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok.');
+        }
+        return response.json(); // 正常なレスポンスをJSONとして解析
+      })
+      .then(data => {
+        if (data.letterID) {
+          localStorage.setItem("letterID", data.letterID.toString()); // 保存された手紙のIDをローカルストレージに保存
+          alert('Draft saved successfully!'); // ここで正常にアラートが表示される
+        } else {
+          throw new Error('Letter ID not found in response.'); // サーバーからのレスポンスにletterIDが含まれていない場合のエラー
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to save the draft.'); // エラー発生時にユーザーに通知
+      });
   };
 
   const saveLetterTemporarily = async () => {
@@ -80,7 +116,23 @@ const Letter = () => {
     }
   };
 
-
+  const closedLetterStyle = {
+    backgroundImage: `url(${imageUrl1})`,
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center center',
+    width: '100%',
+    height: '100vh',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    perspective: '1000px',
+    transition: 'transform 0.5s ease',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    transformStyle: 'preserve-3d',
+  };
   const editorContainerStyle = {
     display: 'flex',
     flexDirection: 'column',
@@ -95,19 +147,21 @@ const Letter = () => {
     minHeight: '700px',
   };
 
+
+
   const quillStyle = {
     width: '100%',
     height: '600px',
     paddingTop: '0px',
     backgroundColor: 'transparent',
     border: 'none',
-    fontSize: fontSize, // フォントサイズの値をここで設定
+    fontSize: fontSize,
   };
 
   return (
     <>
       {!isOpen && (
-        <div className="letter" onClick={() => setIsOpen(true)}>
+        <div className="letter" onClick={() => setIsOpen(true)} style={closedLetterStyle}>
           Click to Open Letter Editor
         </div>
       )}

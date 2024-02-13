@@ -1,18 +1,21 @@
 import React from 'react';
+// React Routerからのインポート
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+
+// カスタムコンポーネントのインポート
 import Header from './Header';
-import TitlePage from './TitlePage';
+import Template from './Template';
 import PersonalInfoForm from './PersonalInfoForm';
 import ConfirmationPage from './ConfirmationPage';
 import DonePage from './DonePage';
 import AboutPage from './AboutPage';
-import HomePage from './HomePage';
 import SignUpPage from './SignUpPage';
 import LoginPage from './LoginPage';
-import Letter from './Letter.js';
+import Letter from './Letter';
 import MyPage from './MyPage';
 import AnalogPage from './AnalogPage';
-import { AuthProvider } from './context/AuthContext'; // AuthProvider をインポート
+import { AuthProvider } from './context/AuthContext';
+import HomePage from './HomePage';
 
 function App() {
   return (
@@ -20,8 +23,8 @@ function App() {
       <AuthProvider> {/* AuthProvider を Router の内側に配置 */}
         <Header />
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/title" element={<TitlePage />} />
+          <Route path="/" element={<HomePage />} />          
+          <Route path="/template" element={<Template />} />          
           <Route path="/personal-info" element={<PersonalInfoForm />} />
           <Route path="/confirm" element={<ConfirmationPage />} />
           <Route path="/done" element={<DonePage />} />
@@ -33,7 +36,7 @@ function App() {
           <Route path="/analog" element={<AnalogPage />} />
           {/* <Route path="/digital" element={<DigitalPage />} /> */}
         </Routes>
-      </AuthProvider> {/* AuthProvider を Router の内側に配置 */}
+      </AuthProvider>
     </Router>
   );
 }

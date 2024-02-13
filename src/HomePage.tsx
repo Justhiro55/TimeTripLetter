@@ -34,7 +34,7 @@ export default function HomePage() {
       {/* <button onClick={handleLogin}>
         {authenticated ? 'ログイン' : 'ログイン'} */}
       <button onClick={() => navigate('/analog')}>アナログ</button> {/* アナログページへのボタン */}
-      <button onClick={() => navigate('/letter')}>デジタル</button>
+      <button onClick={() => navigate('/template')}>デジタル</button>
       {/* </button> */}
     </div>
   );
