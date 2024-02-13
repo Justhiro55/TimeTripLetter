@@ -33,8 +33,17 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Server error", http.StatusInternalServerError)
         return
     }
-
     log.Println("User created successfully")
+
+    if req.TempLetterId != 0 {
+        _, err = db.DB.Exec("UPDATE tempLetter SET email = $1 WHERE id = $2", req.Email, req.TempLetterId)
+        if err != nil {
+            log.Printf("Error updating tempLetter with email: %s", err)
+            // このエラーはクライアントには直接関係しないため、エラーレスポンスを変更しないかもしれません
+        } else {
+            log.Printf("tempLetter id %d updated with email %s", req.TempLetterId, req.Email)
+        }
+    }
     w.WriteHeader(http.StatusOK)
     json.NewEncoder(w).Encode("User created successfully")
 }

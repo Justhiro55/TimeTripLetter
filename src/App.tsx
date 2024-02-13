@@ -55,9 +55,9 @@ import SignUpPage from './SignUpPage';
 import LoginPage from './LoginPage';
 import Letter from './Letter';
 import MyPage from './MyPage';
-
-// コンテキストプロバイダーのインポート
 import { AuthProvider } from './context/AuthContext';
+import AnalogPage from './AnalogPage';
+import { AuthProvider } from './context/AuthContext'; // AuthProvider をインポート
 
 function App() {
   return (
@@ -77,8 +77,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/letter" element={<Letter />} />
           <Route path="/mypage" element={<MyPage />} />
-          
-          {/* 必要に応じて他のルートを追加 */}
+          <Route path="/analog" element={<AnalogPage />} />
+          {/* <Route path="/digital" element={<DigitalPage />} /> */}
         </Routes>
       </AuthProvider>
     </Router>

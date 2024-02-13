@@ -1,6 +1,8 @@
+// PersonalInfoForm.tsx
+
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import './App.css';
 
 type FormData = {
@@ -17,34 +19,36 @@ type FormData = {
 
 export default function PersonalInfoForm() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // location.state から letterID を取得
+  const { letterID } = location.state || { letterID: null };
+
+  // 以前の props の使用を location.state に置き換える
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>();
 
   const onSubmit = (data: FormData) => {
     const sendDate = localStorage.getItem("sendDate");
-    const letterID = localStorage.getItem("letterID"); // letterID をローカルストレージから取得
     const completeData = { 
       ...data, 
-      sendDate, 
-      letterID: letterID ? parseInt(letterID, 10) : null // letterID を整数に変換して追加
+      letterID, // location.stateから取得したletterIDをリクエストデータに追加
+      sendDate
     };
-  
+
     const requestOptions: RequestInit = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(completeData),
       credentials: 'include'
     };
-  
+
     fetch('http://localhost:8080/api/personal-info', requestOptions)
       .then(response => {
         if (response.status === 401) {
-          // トークンが期限切れまたは存在しない場合
           alert('Session expired. Redirecting to login.');
           navigate('/login');
-          return Promise.reject('Unauthorized'); // これにより後続のthenは実行されない
+          return Promise.reject('Unauthorized');
         }
         if (!response.ok) {
-          // その他のエラー
           throw new Error('Network response was not ok');
         }
         return response.json();
@@ -57,7 +61,6 @@ export default function PersonalInfoForm() {
         console.error('Error:', error);
       });
   };
-
 
   return (
     <div className="form-container">
