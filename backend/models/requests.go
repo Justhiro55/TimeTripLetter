@@ -1,10 +1,10 @@
 package models
 
 type SignUpRequest struct {
-    Email    string `json:"email"`
-    Name     string `json:"name"`
-    Address  string `json:"address"`
-    Password string `json:"password"`
+    Email        string `json:"email"`
+    Name         string `json:"name"`
+    Password     string `json:"password"`
+    TempLetterId int    `json:"tempLetterId,omitempty"` // 追加
 }
 
 type LoginRequest struct {

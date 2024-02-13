@@ -1,5 +1,5 @@
-import React, { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, FormEvent, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface SignUpFormData {
   email: string;
@@ -18,12 +18,25 @@ export default function SignUpPage() {
 
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // useLocationからtempLetterIdを取得
+  const { tempLetterId } = location.state || {};
+
+  // tempLetterIdがあればログに出力
+  useEffect(() => {
+    console.log('SignUp: location.state', location.state); // location.stateの全体をログ出力
+
+    if (tempLetterId) {
+      console.log('SignUp: Received tempLetterId:', tempLetterId);
+    }
+  }, [tempLetterId]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [event.target.name]: event.target.value });
   };
 
-    const validatePassword = (password: string) => {
+  const validatePassword = (password: string) => {
     if (password.length < 8 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
       return false;
     }
@@ -31,7 +44,7 @@ export default function SignUpPage() {
   };
 
   const handleSignUp = async (event: FormEvent) => {
-    event.preventDefault();  // フォームのデフォルト送信動作を防止
+    event.preventDefault(); // フォームのデフォルト送信動作を防止
 
     if (!validatePassword(formData.password)) {
       setError('パスワードは8文字以上で、数字と文字を含む必要があります。');
@@ -44,17 +57,18 @@ export default function SignUpPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),  // フォームデータをJSONに変換して送信
+        body: JSON.stringify({ ...formData, tempLetterId }), // tempLetterIdを含める
       });
-
+    
       if (!response.ok) {
         throw new Error('サインアップに失敗しました');
       }
-
-      navigate('/login'); // サインアップ成功後のページへ移動
+    
+      // サインアップ成功後にloginページにtempLetterIdを渡しながら遷移
+      navigate('/login', { state: { tempLetterId } });
     } catch (error) {
       console.error('サインアップエラー:', error);
-      setError(error instanceof Error ? error.message : 'エラーが発生しました'); // エラーメッセージをセット
+      setError(error instanceof Error ? error.message : 'エラーが発生しました');
     }
   };
 
