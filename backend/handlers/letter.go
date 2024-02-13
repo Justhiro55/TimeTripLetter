@@ -8,10 +8,11 @@ import (
     "time"
 
     "github.com/dgrijalva/jwt-go"
-    "myapp/db"
+    // "myapp/db"
 )
 
 func LetterHandler(w http.ResponseWriter, r *http.Request) {
+    log.Println("This message should appear in the log")
 
     if err := r.ParseMultipartForm(10 << 20); err != nil {
         log.Printf("Error parsing multipart form: %s", err)
@@ -19,9 +20,7 @@ func LetterHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    content := r.FormValue("content")
-    fontSize := r.FormValue("fontSize")
-
+    // content と fontSize 変数は使用されていないので削除
     file, header, err := r.FormFile("file")
     if err != nil && err != http.ErrMissingFile {
         log.Printf("Error processing file: %s", err)
@@ -36,6 +35,7 @@ func LetterHandler(w http.ResponseWriter, r *http.Request) {
         log.Printf("File uploaded: %s", filename)
         // ファイル保存処理はここに実装します
     }
+
     var userID int64
     accessTokenCookie, err := r.Cookie("accessToken")
     if err != nil || accessTokenCookie.Value == "" {
@@ -95,20 +95,11 @@ func LetterHandler(w http.ResponseWriter, r *http.Request) {
         userID, _ = strconv.ParseInt(accessTokenClaims.Subject, 10, 64)
     }
 
-    var letterID int64
-    err = db.DB.QueryRow("INSERT INTO letter (user_id, content, font_size, filename) VALUES ($1, $2, $3, $4) RETURNING id", userID, content, fontSize, filename).Scan(&letterID)
-    if err != nil {
-        log.Printf("Error inserting letter into database and retrieving ID: %s", err)
-        http.Error(w, "Server error", http.StatusInternalServerError)
-        return
-    }
-
     log.Println("Letter saved successfully")
     w.WriteHeader(http.StatusOK)
     w.Header().Set("Content-Type", "application/json")
-// letterIDをレスポンスに含める
-json.NewEncoder(w).Encode(map[string]interface{}{
-    "message": "Letter saved successfully",
-    "letterID": letterID,
-})
+    // レスポンスに含めるデータをエンコードして送信
+    json.NewEncoder(w).Encode(map[string]interface{}{
+        "message":  "Letter saved successfully",
+    })
 }

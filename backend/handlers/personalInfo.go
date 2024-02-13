@@ -1,3 +1,5 @@
+// PersonalInfo.go
+
 package handlers
 
 import (
@@ -12,16 +14,15 @@ import (
     "myapp/models"
 )
 
-// personalInfoHandler - 個人情報と決済情報を処理するハンドラー
 func PersonalInfoHandler(w http.ResponseWriter, r *http.Request) {
     var req models.PersonalInfoRequest
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        log.Printf("Error decoding request: %s", err)
+        log.Printf("PersonalInfoHandler: Error decoding request body: %s", err.Error())
         http.Error(w, err.Error(), http.StatusBadRequest)
         return
     }
+    log.Printf("PersonalInfoHandler: Received letterID: %d", req.LetterID)
 
-    // JWTトークンからユーザーIDを取得
     var userID int64
     accessTokenCookie, err := r.Cookie("accessToken")
     if err != nil || accessTokenCookie.Value == "" {
@@ -43,6 +44,7 @@ func PersonalInfoHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         userID, _ = strconv.ParseInt(refreshTokenClaims.Subject, 10, 64)
+
         newAccessToken, _ := generateToken(userID)
         
         http.SetCookie(w, &http.Cookie{
@@ -67,35 +69,32 @@ func PersonalInfoHandler(w http.ResponseWriter, r *http.Request) {
         }
 
         userID, _ = strconv.ParseInt(accessTokenClaims.Subject, 10, 64)
-        
+
         if err != nil {
             http.Error(w, "Invalid token", http.StatusUnauthorized)
             return
         }
     }
 
-    // send_date が空の場合、現在の日時を設定
     sendDate := req.SendDate
     if sendDate == "" {
         sendDate = time.Now().Format("2006-01-02 15:04:05")
     }
 
-    // recipient テーブルにデータを挿入するSQL文を更新して、letter_id カラムに値を設定
     _, err = db.DB.Exec("INSERT INTO recipient (user_id, name, address, postal_code, email, phone_number, send_date, letter_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-    userID, req.RecipientName, req.RecipientAddress, req.RecipientZip, req.RecipientEmail, req.PhoneNumber, sendDate, req.LetterID)
-if err != nil {
-    log.Printf("Error inserting into recipient table: %s", err)
-    http.Error(w, "Server error", http.StatusInternalServerError)
-    return
-}
+        userID, req.RecipientName, req.RecipientAddress, req.RecipientZip, req.RecipientEmail, req.PhoneNumber, sendDate, req.LetterID)
+    if err != nil {
+        log.Printf("Error inserting into recipient table: %s", err)
+        http.Error(w, "Error inserting into recipient table", http.StatusInternalServerError)
+        return
+    }
 
-    // paymentinfo テーブルにデータを挿入
     expiryDate := "2028-06-30" // テスト用の固定された日付
     _, err = db.DB.Exec("INSERT INTO paymentinfo (user_id, card_number, expiry_date, cvv, billing_address) VALUES ($1, $2, $3, $4, $5)",
         userID, req.CardNumber, expiryDate, req.CVC, req.RecipientAddress)
     if err != nil {
         log.Printf("Error inserting into paymentinfo table: %s", err)
-        http.Error(w, "Server error", http.StatusInternalServerError)
+        http.Error(w, "Error inserting into paymentinfo table", http.StatusInternalServerError)
         return
     }
 

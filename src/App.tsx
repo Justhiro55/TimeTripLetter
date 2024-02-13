@@ -11,6 +11,7 @@ import SignUpPage from './SignUpPage';
 import LoginPage from './LoginPage';
 import Letter from './Letter.js';
 import MyPage from './MyPage';
+import AnalogPage from './AnalogPage';
 import { AuthProvider } from './context/AuthContext'; // AuthProvider をインポート
 
 function App() {
@@ -29,6 +30,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/letter" element={<Letter />} />
           <Route path="/mypage" element={<MyPage />} />
+          <Route path="/analog" element={<AnalogPage />} />
+          {/* <Route path="/digital" element={<DigitalPage />} /> */}
         </Routes>
       </AuthProvider> {/* AuthProvider を Router の内側に配置 */}
     </Router>

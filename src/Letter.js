@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import html2canvas from 'html2canvas';
-import 'react-quill/dist/quill.snow.css'; // スタイルシートをインポート
+import 'react-quill/dist/quill.snow.css';
 import Sent from "./compornents/Sent.js"
 import './Letter.css';
 
@@ -16,42 +16,10 @@ const Letter = () => {
   const navigate = useNavigate();
   const captureRef = useRef(null);
 
-  const handleClick = () => {
-    setIsOpen(true);
-  };
-
-  // ページにアクセスした際にトークンを確認する
   useEffect(() => {
-    const checkToken = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/api/token/check', {
-          credentials: 'include'
-        });
-
-        if (response.status === 401) {
-          alert('Session expired. Redirecting to login.');
-          navigate('/login');
-        }
-      } catch (error) {
-        alert('Session expired. Redirecting to login.');
-        console.error('Error:', error);
-        navigate('/login');
-      }
-    };
-
-    checkToken();
-  }, [navigate]);
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-  };
-
-  const handleSaveDraft = () => {
-    saveLetterToServer();
-    localStorage.setItem("sendDate", sendDate);
-    navigate('/personal-info');
-  };
+    console.log("Text:", text);
+    console.log("FontSize:", fontSize);
+  }, [text, fontSize]);
 
   const takeScreenshot = () => {
     if (captureRef.current) {
@@ -59,7 +27,7 @@ const Letter = () => {
         const imgData = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = imgData;
-        link.download = 'letter_capture.png'; // ファイル名を設定
+        link.download = 'letter_capture.png';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -67,52 +35,64 @@ const Letter = () => {
     }
   };
 
-  const saveLetterToServer = () => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('content', text);
-    const fontSizeValue = parseInt(fontSize.replace('px', ''), 10);
-    formData.append('fontSize', fontSizeValue);
-
-    const requestOptions = {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    };
-
-    fetch('http://localhost:8080/api/letter', requestOptions)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok.');
-        }
-        return response.json(); // 正常なレスポンスをJSONとして解析
-      })
-      .then(data => {
-        if (data.letterID) {
-          localStorage.setItem("letterID", data.letterID.toString()); // 保存された手紙のIDをローカルストレージに保存
-          alert('Draft saved successfully!'); // ここで正常にアラートが表示される
-        } else {
-          throw new Error('Letter ID not found in response.'); // サーバーからのレスポンスにletterIDが含まれていない場合のエラー
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to save the draft.'); // エラー発生時にユーザーに通知
+  const saveLetterTemporarily = async () => {
+    const requestData = { content: text, fontSize: parseInt(fontSize, 10), filename: file ? file.name : '' };
+  
+    try {
+      const response = await fetch('http://localhost:8080/api/temp-letters', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
       });
+  
+      if (!response.ok) {
+        throw new Error('Failed to save the letter temporarily.');
+      }
+  
+      const responseData = await response.json();
+      console.log('Temporary letter ID:', responseData.tempLetterId);
+      return responseData.tempLetterId; // tempLetterId を返す
+    } catch (error) {
+      console.error('Error saving letter temporarily:', error);
+      throw error;
+    }
   };
+  
+  const handleNavigateToLogin = async () => {
+    setFontSize("16px"); // フォントサイズを設定
+    try {
+      const tempLetterId = await saveLetterTemporarily(); // tempLetterId を取得
+      navigate('/login', { state: { tempLetterId } }); // 手紙の ID を渡してログインページに遷移
+    } catch (error) {
+      // エラー処理
+    }
+  };
+
+  const handleNavigateToSignup = async () => {
+    setFontSize("16px"); // フォントサイズを設定
+    try {
+      const tempLetterId = await saveLetterTemporarily(); // tempLetterId を取得
+      navigate('/signup', { state: { tempLetterId } }); // 手紙の ID を渡してサインアップページに遷移
+    } catch (error) {
+      // エラー処理
+    }
+  };
+
 
   const editorContainerStyle = {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'flex-start', // 上端に寄せる
+    justifyContent: 'flex-start',
     alignItems: 'center',
     background: 'url(/images/letter.jpg) no-repeat center center',
     backgroundSize: 'cover',
     padding: '20px',
     width: '80%',
     margin: '0 auto',
-    marginTop: '10px', // 上のマージンを適宜調整
-    minHeight: '700px', // コンテナの最小高さを設定
+    marginTop: '10px',
+    minHeight: '700px',
   };
 
   const quillStyle = {
@@ -121,6 +101,7 @@ const Letter = () => {
     paddingTop: '0px',
     backgroundColor: 'transparent',
     border: 'none',
+    fontSize: fontSize, // フォントサイズの値をここで設定
   };
 
   return (
@@ -134,19 +115,19 @@ const Letter = () => {
         <div ref={captureRef} style={{ width: '100%', height: '100%' }}>
           <div style={{ ...editorContainerStyle }}>
             <ReactQuill theme="snow" value={text} onChange={setText} style={quillStyle} />
-            {/* その他の入力フィールド... */}
           </div>
-          {/* Sent コンポーネントを追加して、sendDate ステートを渡す */}
-          <div className="date-picker-container">
-            <Sent sentState={[sendDate, setSendDate]} />
-            {/* その他のコンテンツ */}
+          <Sent sentState={[sendDate, setSendDate]} />
+          <div className="button-container">
+          <div className="login-signup-guide">
+            <p>アカウントをお持ちの方はこちら</p>
+            <button onClick={handleNavigateToLogin} className="login-button">ログイン</button>
           </div>
-            <div className="save-draft-button-container">
-            <button onClick={handleSaveDraft} className="save-draft-button">
-              Complete Draft
-            </button>
-            <button onClick={takeScreenshot} className="save-draft-button">Save as Image</button>
+          <div className="login-signup-guide">
+            <p>アカウントをお持ちでない方はこちら</p>
+            <button onClick={handleNavigateToSignup} className="signup-button">サインアップ</button>
           </div>
+          <button onClick={takeScreenshot} className="save-draft-button">Save as Image</button>
+        </div>
         </div>
       )}
     </>
@@ -154,3 +135,4 @@ const Letter = () => {
 };
 
 export default Letter;
+
