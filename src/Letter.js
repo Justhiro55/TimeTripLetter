@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import html2canvas from 'html2canvas';
 import 'react-quill/dist/quill.snow.css';
-import Sent from "./compornents/Sent.js"
+import Sent from "./compornents/Sent.js";
 import './Letter.css';
 
 const Letter = () => {
@@ -18,7 +17,6 @@ const Letter = () => {
   const captureRef = useRef(null);
   const location = useLocation();
   const { imageUrl1, imageUrl2 } = location.state || { imageUrl1: '', imageUrl2: '' };
-
 
   useEffect(() => {
     console.log("Text:", text);
@@ -37,20 +35,6 @@ const Letter = () => {
         document.body.removeChild(link);
       });
     }
-  };
-
-  const editorContainerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    backgroundImage: `url(${imageUrl2})`,
-    backgroundSize: 'cover',
-    padding: '20px',
-    width: '80%',
-    margin: '0 auto',
-    marginTop: '10px',
-    minHeight: '700px',
   };
 
   const saveLetterToServer = () => {
@@ -84,6 +68,9 @@ const Letter = () => {
       .catch(error => {
         console.error('Error:', error);
         alert('Failed to save the draft.'); // エラー発生時にユーザーに通知
+      });
+  };
+
   const saveLetterTemporarily = async () => {
     const requestData = { content: text, fontSize: parseInt(fontSize, 10), filename: file ? file.name : '' };
   
@@ -168,7 +155,7 @@ const Letter = () => {
     paddingTop: '0px',
     backgroundColor: 'transparent',
     border: 'none',
-    fontSize: fontSize, // フォントサイズの値をここで設定
+    fontSize: fontSize,
   };
 
   return (
