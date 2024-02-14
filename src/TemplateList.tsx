@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 
 interface Template {
   id: number;
-  imageUrl1: string; // 最初の画像URL
-  imageUrl2: string; // 2つ目の画像URL
+  imageUrl1: string;
+  imageUrl2: string;
   title: string;
   price: string;
 }
@@ -13,15 +13,15 @@ interface Template {
 const templates = [
   {
     id: 1,
-    imageUrl1: '/images/letter.jpg', // 絶対パスに変更
+    imageUrl1: '/images/open.jpg',
     imageUrl2: '/images/letter.jpg',
     title: 'Product 1',
     price: '¥1,000',
   },
   {
     id: 2,
-    imageUrl1: '/images/open.jpg', // 絶対パスに変更
-    imageUrl2: '/images/letter.jpg',
+    imageUrl1: '/images/letter2.jpeg',
+    imageUrl2: '/images/letter2-test.jpeg',
     title: 'Product 2',
     price: '¥2,000',
   }
@@ -32,7 +32,6 @@ const TemplateList: React.FC = () => {
   const navigate = useNavigate();
   const [selectedImages, setSelectedImages] = useState<{ imageUrl1: string; imageUrl2: string }>({ imageUrl1: '', imageUrl2: '' });
 
-  // templateパラメータに型を指定
   const handleItemClick = (template: Template) => {
     setSelectedImages({ imageUrl1: template.imageUrl1, imageUrl2: template.imageUrl2 });
     console.log("Selected Image URLs:", template.imageUrl1, template.imageUrl2);
@@ -45,7 +44,7 @@ const TemplateList: React.FC = () => {
         {templates.map((template) => (
           <li key={template.id}>
             <TemplateItem
-              imageUrl1={template.imageUrl1} // 正しいプロパティ名に修正
+              imageUrl1={template.imageUrl1}
               imageUrl2={template.imageUrl2}
               title={template.title}
               price={template.price}
