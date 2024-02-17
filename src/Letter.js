@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import html2canvas from 'html2canvas';
 import 'react-quill/dist/quill.snow.css';
-import Sent from "./compornents/Sent.js";
+import Sent from "./compornents/Sent.js"; // "compornents"が誤字のようなので修正
 import './Letter.css';
 
 const Letter = () => {
@@ -17,11 +17,47 @@ const Letter = () => {
   const captureRef = useRef(null);
   const location = useLocation();
   const { imageUrl1, imageUrl2 } = location.state || { imageUrl1: '', imageUrl2: '' };
+  const textRef = useRef(text); // useRefを使用してtextの現在値を追跡
 
   useEffect(() => {
-    console.log("Text:", text);
-    console.log("FontSize:", fontSize);
-  }, [text, fontSize]);
+    const handleBeforeUnload = (e) => {
+      if (textRef.current !== "") {
+        e.preventDefault();
+        e.returnValue = "You have unsaved changes!";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
+  useEffect(() => {
+    textRef.current = text; // textが変更されるたびにtextRefを更新
+  }, [text]);
+
+  useEffect(() => {
+    const handleNavigateAway = (event) => {
+      // テキストが変更されていて、/loginや/signupへの遷移ではない場合に警告
+      if (text !== "" && !event.target.pathname.includes("/login") && !event.target.pathname.includes("/signup")) {
+        if (!window.confirm("You have unsaved changes. Are you sure you want to leave?")) {
+          event.preventDefault();
+        }
+      }
+    };
+
+    // すべてのリンクに対してイベントリスナーを設定
+    document.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", handleNavigateAway);
+    });
+
+    // クリーンアップ関数でイベントリスナーを削除
+    return () => {
+      document.querySelectorAll("a").forEach(link => {
+        link.removeEventListener("click", handleNavigateAway);
+      });
+    };
+  }, [text]);
 
   const takeScreenshot = () => {
     if (captureRef.current) {

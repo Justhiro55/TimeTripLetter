@@ -1,11 +1,13 @@
+// Header.tsx
+
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // useHistoryをuseNavigateに置き換え
 import { useAuth } from './context/AuthContext'; // AuthContextからuseAuthをインポート
 
 export default function Header() {
   const { isLoggedIn, setIsLoggedIn } = useAuth(); // AuthContextからisLoggedInを取得
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // useHistoryをuseNavigateに置き換え
 
   useEffect(() => {
     // トークン検証
@@ -49,6 +51,24 @@ export default function Header() {
       console.error('Logout error:', error);
     });
   };
+
+  // ブラウザの戻るボタンがクリックされたときに確認ダイアログを表示
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!isOpen) {
+        return;
+      }
+      const message = "ページを移動しますか？変更内容が失われる可能性があります。";
+      event.returnValue = message;
+      return message;
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isOpen]);
 
   return (
     <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', backgroundColor: '#f3f3f3', borderBottom: '1px solid #ddd' }}>
