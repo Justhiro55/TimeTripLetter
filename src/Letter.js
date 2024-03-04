@@ -138,7 +138,7 @@ const Letter = () => {
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    background: 'url(/images/letter.jpg) no-repeat center center',
+    background: `url(${imageUrl2}) no-repeat center center`,
     backgroundSize: 'cover',
     padding: '20px',
     width: '80%',
@@ -162,7 +162,6 @@ const Letter = () => {
     <>
       {!isOpen && (
         <div className="letter" onClick={() => setIsOpen(true)} style={closedLetterStyle}>
-          Click to Open Letter Editor
         </div>
       )}
       {isOpen && (
