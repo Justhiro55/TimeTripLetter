@@ -121,8 +121,8 @@ const Letter = () => {
     backgroundSize: 'cover',
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'center center',
-    width: '100%',
-    height: '100vh',
+    width: '600px',
+    height: '90vh',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     borderRadius: '8px',
     cursor: 'pointer',
@@ -133,26 +133,24 @@ const Letter = () => {
     alignItems: 'center',
     transformStyle: 'preserve-3d',
   };
+  
   const editorContainerStyle = {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
     background: `url(${imageUrl2}) no-repeat center center`,
     backgroundSize: 'cover',
-    padding: '20px',
-    width: '80%',
+    padding: '10px',
+    width: '700px',
     margin: '0 auto',
     marginTop: '10px',
-    minHeight: '700px',
   };
 
-
-
   const quillStyle = {
-    width: '100%',
-    height: '600px',
-    paddingTop: '0px',
+    width: '700px',
+    height: '900px',
+    marginBottom: '60px',
     backgroundColor: 'transparent',
     border: 'none',
     fontSize: fontSize,
@@ -188,4 +186,3 @@ const Letter = () => {
 };
 
 export default Letter;
-

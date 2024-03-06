@@ -8,19 +8,16 @@ body {
   background-position: center center;
 }
 
-.letter-container {
-  display: flex;
-  flex-direction: column; /* 子要素を垂直方向に並べる */
 
-  background-image: url('../public/images/letter.jpg');
-  width: 100vw; /* ビューポートの幅に合わせる */
-  height: 100vh; /* ビューポートの高さに合わせる */
+.letter-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('../public/images/letter.jpg');
+  background-size: contain; /* 画像を背景に収める */
   background-repeat: no-repeat;
-  background-size: 100vw 100vh; /* 画像をビューポートのサイズに強制的に合わせる */
 }
 
 .letter {
